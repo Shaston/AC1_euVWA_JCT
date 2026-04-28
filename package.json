@@ -1,0 +1,13 @@
+{
+  "name": "web-security-lab",
+  "version": "2.0.0",
+  "description": "Node security lab for XSS, Command Injection and File Inclusion",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "express": "^5.2.1"
+  }
+}
