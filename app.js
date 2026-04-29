@@ -4,6 +4,9 @@ const express = require("express");
 // Importa las rutas relacionadas con vulnerabilidades XSS
 const xssRoutes = require("./routes/xss");
 
+// nuevo para domxss
+const domxssRoutes = require("./routes/domxss");
+
 // Importa las rutas relacionadas con ejecución de comandos
 const commandRoutes = require("./routes/command");
 
@@ -33,6 +36,7 @@ app.get("/", (req, res) => {
 <link rel="stylesheet" href="/style.css">
 
 <h1>UE Web Security Lab</h1>
+<p><strong>Versión activa:</strong> secure</p>
 
 <h2>XSS</h2>
 <ul>
@@ -40,6 +44,7 @@ app.get("/", (req, res) => {
 <li><a href="/xss/stored">Stored XSS</a></li>
 <li><a href="/xss/reflected-safe">Reflected XSS (safe)</a></li>
 <li><a href="/xss/stored-safe">Stored XSS (safe)</a></li>
+<li><a href="/domxss">DOM XSS Safe</a></li>
 </ul>
 
 <h2>Command Execution</h2>
@@ -60,6 +65,9 @@ app.get("/", (req, res) => {
 // Monta las rutas XSS bajo el prefijo "/xss"
 // Ejemplo: /xss/reflected
 app.use("/xss", xssRoutes);
+
+// nuevo de domxss
+app.use("/domxss", domxssRoutes);
 
 // Monta las rutas de commandRoutes en la raíz "/"
 // (las rutas internas ya definen sus paths, como /cmd, /cmd-safe)
