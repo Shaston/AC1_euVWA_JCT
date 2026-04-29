@@ -27,3 +27,25 @@ Las 8 vulnerabilidades planificadas para la actividad son:
 Se trabajará vulnerabilidad por vulnerabilidad, implementando cada pareja:
  versión vulnerable
  versión secure
+
+ ### Módulo 1 completado: DOM-based XSS
+
+**Categoría:** OWASP Top 10 - Injection / XSS  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un nuevo módulo `DOM XSS` accesible desde la portada de la aplicación.  
+Ambas versiones mantienen la misma funcionalidad: el usuario introduce texto en un campo y dicho contenido se refleja dinámicamente en el DOM al pulsar el botón `Mostrar`.
+
+**Versión vulnerable**  
+La versión vulnerable inserta la entrada del usuario usando `innerHTML`.  
+Esto permite que el navegador interprete la entrada como HTML y ejecute código inyectado, provocando una vulnerabilidad de tipo DOM-based XSS.
+
+**Versión segura**  
+La versión segura inserta la entrada del usuario usando `textContent`.  
+De este modo, la entrada se trata como texto plano y no como HTML interpretable, evitando la ejecución del payload en este contexto.
+
+**Pruebas realizadas**  
+Payload de prueba 1:
+```html
+<b>hola</b>
