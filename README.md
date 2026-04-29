@@ -3,6 +3,9 @@ Damn Vulnerable Web Application (DVWA) a un entorno moderno basado en Node.js + 
 
 
 para iniciar la app en el directorio raiz npm start o node app.js
+Ultimos cambios añadidos, tema de puertos y las pruebas en ramas sec y vul para no tener que arrancar y para el server
+## En app.js const PORT = process.env.PORT || 3000;
+Y luego ya por ej para los servidores PORT=3001 npm start en vul y PORT=3002 npm start en secure. 
 
 
 Base inicial del laboratorio Node.js + Express funcionando en local.
