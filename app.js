@@ -17,7 +17,8 @@ const fileRoutes = require("./routes/file");
 const app = express();
 
 // Define el puerto en el que correrá el servidor
-const PORT = 3000;
+//1º para pruebas-> const PORT = process.env.PORT || 3000; original->  const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware para parsear datos enviados en formularios (application/x-www-form-urlencoded)
 // extended: true permite usar objetos complejos (basado en qs)
