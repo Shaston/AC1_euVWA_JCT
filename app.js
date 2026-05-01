@@ -16,6 +16,9 @@ const fileRoutes = require("./routes/file");
 // Importa las rutas con ejecucion de command execution
 const blindCmdRoutes = require("./routes/blindcmd");
 
+// Importa las rutas con ejecucion de File inclusion
+const downloadRoutes = require("./routes/download");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -62,6 +65,7 @@ app.get("/", (req, res) => {
 <ul>
 <li><a href="/file">File Viewer</a></li>
 <li><a href="/file-safe">File Viewer (safe)</a></li>
+<li><a href="/download">Path Traversal / Download Safe</a></li>
 </ul>
 
 `);
@@ -76,6 +80,9 @@ app.use("/domxss", domxssRoutes);
 
 // Monta las rutas de blindcmd en la raiz
 app.use("/", blindCmdRoutes);
+
+// Monsta las rutas de downloadroutes en la raiz
+app.use("/", downloadRoutes);
 
 // Monta las rutas de commandRoutes en la raíz "/"
 // (las rutas internas ya definen sus paths, como /cmd, /cmd-safe)
