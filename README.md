@@ -37,18 +37,39 @@ Se trabajará vulnerabilidad por vulnerabilidad, implementando cada pareja:
 **Estado:** completado en versión vulnerable y versión segura
 
 **Descripción funcional**  
-Se ha añadido un nuevo módulo `DOM XSS` accesible desde la portada de la aplicación.  
-Ambas versiones mantienen la misma funcionalidad: el usuario introduce texto en un campo y dicho contenido se refleja dinámicamente en el DOM al pulsar el botón `Mostrar`.
+Se ha añadido un nuevo módulo DOM XSS accesible desde la portada de la aplicación.  
+Ambas versiones mantienen la misma funcionalidad: el usuario introduce texto en un campo y dicho contenido se refleja dinámicamente en el DOM al pulsar el botón 'Mostrar'.
 
 **Versión vulnerable**  
-La versión vulnerable inserta la entrada del usuario usando `innerHTML`.  
+La versión vulnerable inserta la entrada del usuario usando 'innerHTML'.  
 Esto permite que el navegador interprete la entrada como HTML y ejecute código inyectado, provocando una vulnerabilidad de tipo DOM-based XSS.
 
 **Versión segura**  
-La versión segura inserta la entrada del usuario usando `textContent`.  
+La versión segura inserta la entrada del usuario usando 'textContent'.  
 De este modo, la entrada se trata como texto plano y no como HTML interpretable, evitando la ejecución del payload en este contexto.
 
 **Pruebas realizadas**  
 Payload de prueba 1:
-```html
-<b>hola</b>
+<b>hola</b> entre otras 
+
+### Módulo 2 completado: Blind Command Injection
+
+**Categoría:** OWASP Top 10 - Injection / OS Command Injection  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un nuevo módulo `Blind Command Injection` para demostrar una inyección ciega por tiempo.  
+Ambas versiones mantienen la misma idea funcional: el usuario introduce un host y la aplicación devuelve una respuesta indicando el resultado de la operación.
+
+**Versión vulnerable**  
+La versión vulnerable construye un comando del sistema concatenando directamente la entrada del usuario.  
+No muestra la salida del comando, pero sí el tiempo de respuesta, lo que permite demostrar una blind command injection mediante retardos artificiales.
+
+**Versión segura**  
+La versión segura valida el valor recibido y evita por completo invocar comandos del sistema.  
+En su lugar utiliza `dns.lookup()` como API nativa de Node.js para resolver el host, reduciendo de forma clara la superficie de ataque.
+
+**Prueba realizada**  
+Payload de prueba:
+
+127.0.0.1; sleep 5
