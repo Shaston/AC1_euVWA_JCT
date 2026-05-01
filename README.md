@@ -31,6 +31,8 @@ Se trabajará vulnerabilidad por vulnerabilidad, implementando cada pareja:
  versión vulnerable
  versión secure
 
+---
+
  ### Módulo 1 completado: DOM-based XSS
 
 **Categoría:** OWASP Top 10 - Injection / XSS  
@@ -51,6 +53,8 @@ De este modo, la entrada se trata como texto plano y no como HTML interpretable,
 **Pruebas realizadas**  
 Payload de prueba 1:
 <b>hola</b> entre otras 
+
+---
 
 ### Módulo 2 completado: Blind Command Injection
 
@@ -73,3 +77,26 @@ En su lugar utiliza `dns.lookup()` como API nativa de Node.js para resolver el h
 Payload de prueba:
 
 127.0.0.1; sleep 5
+
+---
+
+### Módulo 3 completado: Path Traversal / Arbitrary File Download
+
+**Categoría:** OWASP Top 10 - File Inclusion / Path Traversal  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un nuevo módulo de descarga de ficheros.  
+Ambas versiones permiten solicitar un archivo para su descarga, pero difieren en la forma de validar el nombre y la ruta solicitada.
+
+**Versión vulnerable**  
+La versión vulnerable construye la ruta de descarga a partir de la entrada del usuario sin validación suficiente.  
+Esto permite descargar archivos fuera del directorio previsto mediante secuencias de path traversal.
+
+**Versión segura**  
+La versión segura limita los nombres permitidos mediante una allowlist y resuelve la ruta final con `path.resolve()`, comprobando que permanezca dentro del directorio autorizado antes de descargar el fichero.
+
+**Pruebas realizadas**  
+Payload de prueba 1:
+
+../package.json
