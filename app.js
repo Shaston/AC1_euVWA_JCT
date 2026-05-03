@@ -28,6 +28,9 @@ const uploadRoutes = require("./routes/upload");
 // importa las rutas con ejecucion missconfig
 const configRoutes = require("./routes/config");
 
+// importa las rutas con ejecucion broken auth
+const authRoutes = require("./routes/auth");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -93,6 +96,11 @@ app.get("/", (req, res) => {
 <li><a href="/debug-crash">Debug Crash Vul</a></li>
 </ul>
 
+<h2>Broken Authentication</h2>
+<ul>
+<li><a href="/auth-vul/login">Broken Authentication Vul</a></li>
+</ul>
+
 `);
 });
 
@@ -127,6 +135,9 @@ app.use("/", fileRoutes);
 
 // monta las rutas de missconfig en la raiz
 app.use("/", configRoutes);
+
+// monsta las rutas de broken auth en la raiz
+app.use("/", authRoutes);
 
 // Inicia el servidor y lo pone a escuchar en el puerto definido
 app.listen(PORT, () => {
