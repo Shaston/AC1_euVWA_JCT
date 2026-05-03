@@ -19,6 +19,9 @@ const blindCmdRoutes = require("./routes/blindcmd");
 // Importa las rutas con ejecucion de File inclusion
 const downloadRoutes = require("./routes/download");
 
+// importa las rutas con ejecucion sql
+const sqliRoutes = require("./routes/sqli");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -68,6 +71,11 @@ app.get("/", (req, res) => {
 <li><a href="/download">Path Traversal / Download Safe</a></li>
 </ul>
 
+<h2>SQL Injection</h2>
+<ul>
+<li><a href="/sqli-login">SQLi Login Safe</a></li>
+</ul>
+
 `);
 });
 
@@ -83,6 +91,9 @@ app.use("/", blindCmdRoutes);
 
 // Monsta las rutas de downloadroutes en la raiz
 app.use("/", downloadRoutes);
+
+// monta las rutas de sql injection en la raiz
+app.use("/", sqliRoutes);
 
 // Monta las rutas de commandRoutes en la raíz "/"
 // (las rutas internas ya definen sus paths, como /cmd, /cmd-safe)
