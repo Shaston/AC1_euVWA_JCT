@@ -130,14 +130,18 @@ Vulnerable
 <b>hola</b> se renderiza en negrita.
 <img src=x onerror=alert('XSS')> ejecuta el alert.
 
-INSERTAR IMAGENES
+<img width="588" height="309" alt="image" src="https://github.com/user-attachments/assets/66d972ac-02b4-43cd-bd0e-bf8da2142b99" />
+<img width="890" height="546" alt="image" src="https://github.com/user-attachments/assets/6fc40f8b-98d3-41ca-b3c7-83f87c4bdb77" />
+
 
 Segura
 
 Ambos payloads se muestran como texto.
 No se ejecuta JavaScript.
 
-INSERTAR IMAGENES
+<img width="564" height="314" alt="image" src="https://github.com/user-attachments/assets/62e609a2-7666-4141-8f59-91b3dde817f3" />
+<img width="619" height="320" alt="image" src="https://github.com/user-attachments/assets/201ec9e9-42a8-4c7e-981c-5b0f56f17f22" />
+
 
 ---
 
