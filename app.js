@@ -32,6 +32,9 @@ const configRoutes = require("./routes/config");
 const session = require("express-session");
 const authRoutes = require("./routes/auth");
 
+// importa rutas con ejeucion data exposure
+const sensitiveRoutes = require("./routes/sensitive");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -102,6 +105,10 @@ app.get("/", (req, res) => {
 <li><a href="/auth-safe/login">Broken Authentication Safe</a></li>
 </ul>
 
+<h2>Sensitive Data Exposure</h2>
+<ul>
+<li><a href="/sensitive-safe/profile">Sensitive Data Exposure Safe</a></li>
+</ul>
 
 `);
 });
@@ -135,6 +142,9 @@ app.use("/", fileRoutes);
 
 // monta las rutas de missconfig en la raiz
 app.use("/", configRoutes);
+
+// monta las rutas de data exposure
+app.use("/", sensitiveRoutes);
 
 // configucaciones de la sesion
 app.use(session({
