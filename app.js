@@ -28,6 +28,10 @@ const uploadRoutes = require("./routes/upload");
 // importa las rutas con ejecucion missconfig
 const configRoutes = require("./routes/config");
 
+// importa las rutas con ejecucion broken auth
+const session = require("express-session");
+const authRoutes = require("./routes/auth");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -93,6 +97,12 @@ app.get("/", (req, res) => {
 <li><a href="/safe-crash">Crash Safe</a></li>
 </ul>
 
+<h2>Broken Authentication</h2>
+<ul>
+<li><a href="/auth-safe/login">Broken Authentication Safe</a></li>
+</ul>
+
+
 `);
 });
 
@@ -125,6 +135,24 @@ app.use("/", fileRoutes);
 
 // monta las rutas de missconfig en la raiz
 app.use("/", configRoutes);
+
+// configucaciones de la sesion
+app.use(session({
+  name: "id",
+  secret: process.env.SESSION_SECRET || "lab-dev-secret-please-change-1234567890",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: "auto",
+    maxAge: 15 * 60 * 1000
+  }
+}));
+
+// monta las rutas de broke nauth en raiz 
+app.use("/", authRoutes);
+
 
 // para la prueba de missconfig arrancar el servidor con "NODE_ENV=production PORT=3002 npm start"
 // manejador de errores, para que sean mas controlados que la version vul y missconfig
