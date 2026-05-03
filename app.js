@@ -22,6 +22,9 @@ const downloadRoutes = require("./routes/download");
 // importa las rutas con ejecucion sql
 const sqliRoutes = require("./routes/sqli");
 
+// importa las rutas con ejecucion fileupload
+const uploadRoutes = require("./routes/upload");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -76,6 +79,11 @@ app.get("/", (req, res) => {
 <li><a href="/sqli-login">SQLi Login Safe</a></li>
 </ul>
 
+<h2>File Upload</h2>
+<ul>
+<li><a href="/upload-safe">Insecure File Upload Safe</a></li>
+</ul>
+
 `);
 });
 
@@ -94,6 +102,9 @@ app.use("/", downloadRoutes);
 
 // monta las rutas de sql injection en la raiz
 app.use("/", sqliRoutes);
+
+// monta las rutas de file upload en la raiz
+app.use("/", uploadRoutes);
 
 // Monta las rutas de commandRoutes en la raíz "/"
 // (las rutas internas ya definen sus paths, como /cmd, /cmd-safe)
