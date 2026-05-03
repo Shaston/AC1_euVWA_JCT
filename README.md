@@ -100,3 +100,32 @@ La versión segura limita los nombres permitidos mediante una allowlist y resuel
 Payload de prueba 1:
 
 ../package.json
+
+
+### Módulo 4 completado: SQL Injection Login
+
+**Categoría:** OWASP Top 10 - Injection / SQL Injection  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un módulo de autenticación simple basado en SQLite.  
+Ambas versiones permiten iniciar sesión con un usuario de prueba (`admin / admin123`), pero difieren en la forma de construir la consulta SQL.
+
+**Versión vulnerable**  
+La versión vulnerable concatena directamente la entrada del usuario dentro de la sentencia SQL.  
+Esto permite alterar la consulta y provocar un bypass de autenticación mediante SQL Injection.
+
+**Versión segura**  
+La versión segura utiliza consultas parametrizadas (`?`) con binding de valores, separando claramente la lógica SQL de los datos suministrados por el usuario.  
+Además, aplica una validación básica de entrada.
+
+**Pruebas realizadas**  
+Prueba legítima:
+
+admin/admin123
+
+Prueba owasp
+
+' OR '1'='1' -- / loquesea
+
+---
