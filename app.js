@@ -25,6 +25,9 @@ const sqliRoutes = require("./routes/sqli");
 // importa las rutas con ejecucion fileupload
 const uploadRoutes = require("./routes/upload");
 
+// importa las rutas con ejecucion missconfig
+const configRoutes = require("./routes/config");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -84,6 +87,12 @@ app.get("/", (req, res) => {
 <li><a href="/upload-safe">Insecure File Upload Safe</a></li>
 </ul>
 
+<h2>Security Misconfiguration</h2>
+<ul>
+<li><a href="/safe-config">Config Safe</a></li>
+<li><a href="/safe-crash">Crash Safe</a></li>
+</ul>
+
 `);
 });
 
@@ -113,6 +122,22 @@ app.use("/", commandRoutes);
 // Monta las rutas de fileRoutes en la raíz "/"
 // (ej: /file, /file-safe)
 app.use("/", fileRoutes);
+
+// monta las rutas de missconfig en la raiz
+app.use("/", configRoutes);
+
+// para la prueba de missconfig arrancar el servidor con "NODE_ENV=production PORT=3002 npm start"
+// manejador de errores, para que sean mas controlados que la version vul y missconfig
+app.use((err, req, res, next) => {
+  console.error(err.message);
+
+  res.status(500).send(`
+    <link rel="stylesheet" href="/style.css">
+    <h1>Internal Server Error</h1>
+    <p>Se ha producido un error interno.</p>
+    <a href="/">Back</a>
+  `);
+});
 
 // Inicia el servidor y lo pone a escuchar en el puerto definido
 app.listen(PORT, () => {
