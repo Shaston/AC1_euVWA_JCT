@@ -31,6 +31,9 @@ const configRoutes = require("./routes/config");
 // importa las rutas con ejecucion broken auth
 const authRoutes = require("./routes/auth");
 
+// importa rutas con ejeucion data exposure
+const sensitiveRoutes = require("./routes/sensitive");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -101,6 +104,11 @@ app.get("/", (req, res) => {
 <li><a href="/auth-vul/login">Broken Authentication Vul</a></li>
 </ul>
 
+<h2>Sensitive Data Exposure</h2>
+<ul>
+<li><a href="/sensitive-vul/profile">Sensitive Data Exposure Vul</a></li>
+</ul>
+
 `);
 });
 
@@ -138,6 +146,9 @@ app.use("/", configRoutes);
 
 // monsta las rutas de broken auth en la raiz
 app.use("/", authRoutes);
+
+// monta las rutas de data exposure
+app.use("/", sensitiveRoutes);
 
 // Inicia el servidor y lo pone a escuchar en el puerto definido
 app.listen(PORT, () => {
