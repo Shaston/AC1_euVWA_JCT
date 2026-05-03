@@ -129,3 +129,34 @@ Prueba owasp
 ' OR '1'='1' -- / loquesea
 
 ---
+
+### Módulo 5 completado: Insecure File Upload
+
+**Categoría:** OWASP Top 10 - Insecure File Upload  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un módulo de subida de archivos.  
+Ambas versiones permiten subir un archivo, pero difieren en las validaciones aplicadas y en la forma de almacenarlo/publicarlo.
+
+**Versión vulnerable**  
+La versión vulnerable acepta archivos sin restricciones suficientes, conserva el nombre original y los deja accesibles desde una ruta pública servida por la aplicación.  
+Esto permite subir contenido activo, como un archivo HTML con JavaScript embebido, y ejecutarlo posteriormente desde el navegador.
+
+**Versión segura**  
+La versión segura solo permite archivos `.txt`, aplica límite de tamaño, renombra el archivo antes de almacenarlo y no lo expone mediante una ruta pública directa.
+
+**Pruebas realizadas**  
+Prueba 1:
+- Se subió un archivo `prueba.html` con contenido HTML y JavaScript.
+- En la versión vulnerable el archivo quedó accesible en `/uploads/prueba.html` y su contenido se ejecutó al abrirlo.
+
+Prueba 2:
+- Se intentó subir el mismo archivo `prueba.html` en la versión segura.
+- La subida fue rechazada al no cumplir la extensión permitida.
+
+Prueba 3:
+- Se subió un archivo `nota.txt` en la versión segura.
+- El archivo fue aceptado, renombrado y almacenado de forma controlada.
+
+---
