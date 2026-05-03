@@ -25,6 +25,9 @@ const sqliRoutes = require("./routes/sqli");
 // importa las rutas con ejecucion fileupload
 const uploadRoutes = require("./routes/upload");
 
+// importa las rutas con ejecucion missconfig
+const configRoutes = require("./routes/config");
+
 // Inicializa la aplicación Express
 const app = express();
 
@@ -84,6 +87,12 @@ app.get("/", (req, res) => {
 <li><a href="/upload-vul">Insecure File Upload Vul</a></li>
 </ul>
 
+<h2>Security Misconfiguration</h2>
+<ul>
+<li><a href="/debug-config">Debug Config Vul</a></li>
+<li><a href="/debug-crash">Debug Crash Vul</a></li>
+</ul>
+
 `);
 });
 
@@ -115,6 +124,9 @@ app.use("/", commandRoutes);
 // Monta las rutas de fileRoutes en la raíz "/"
 // (ej: /file, /file-safe)
 app.use("/", fileRoutes);
+
+// monta las rutas de missconfig en la raiz
+app.use("/", configRoutes);
 
 // Inicia el servidor y lo pone a escuchar en el puerto definido
 app.listen(PORT, () => {
