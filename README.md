@@ -224,3 +224,39 @@ En la version segura
 /auth-safe/panel?user=admin&role=admin&auth=1
 
 ---
+
+### Módulo 8 completado: Sensitive Data Exposure / Cryptographic Failures
+
+**Categoría:** OWASP Top 10 - Sensitive Data Exposure / Cryptographic Failures  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un módulo de perfil de usuario demo para mostrar el tratamiento inseguro y seguro de datos sensibles.
+
+**Versión vulnerable**  
+La versión vulnerable expone datos sensibles en claro, incluyendo contraseña, número de tarjeta completo, API key completa y notas internas.  
+Además, utiliza una codificación débil (`base64`) para una contraseña de backup, lo que no aporta protección criptográfica real.
+
+**Versión segura**  
+La versión segura minimiza la exposición de datos sensibles, enmascara valores críticos y sustituye la contraseña en claro por un hash derivado mediante `scrypt`.  
+También redacciona la información innecesaria que no debe mostrarse al cliente.
+
+**Pruebas realizadas**  
+Prueba 1:
+- Acceso a `/sensitive-vul/profile` en la versión vulnerable.
+- Se observan directamente:
+  - `password` en claro
+  - `backupPasswordB64`
+  - `cardNumber` completo
+  - `apiKey` completo
+  - `personalNote` completa
+
+Prueba 2:
+- Acceso a `/sensitive-safe/profile` en la versión segura.
+- Se observan:
+  - `passwordHash` derivado con `scrypt`
+  - `cardNumberMasked`
+  - `apiKeyMasked`
+  - `personalNote` redacted
+
+---
