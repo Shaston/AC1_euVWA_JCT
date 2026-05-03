@@ -4,9 +4,20 @@ Damn Vulnerable Web Application (DVWA) a un entorno moderno basado en Node.js + 
 
 para iniciar la app en el directorio raiz npm start o node app.js
 Ultimos cambios añadidos, tema de puertos y las pruebas en ramas sec y vul para no tener que arrancar y para el server
-## En app.js const PORT = process.env.PORT || 3000;
-Y luego ya por ej para los servidores PORT=3001 npm start en vul y PORT=3002 npm start en secure. 
+En app.js const PORT = process.env.PORT || 3000;
+Y luego ya por ej para los servidores PORT=3001 npm start en vul y PORT=3002 npm start en secure, aunque a luego llego a usar NODE_ENV=production PORT=3002 npm
 
+LAS RAMA main SE UTILIZA COMO DOCUMENTACION Y PUNTO DE ENTRADA AL REPO. EL CODIGO FUENTE FINAL, ESTA EN main-vulnerable Y main-secure, LAS 2 RAMAS INDEPENDIENTES O DIFERENCIADAS QUE SE PEDIA.
+
+1. La aplicación mantiene una estructura modular mediante:
+
+app.js
+routes/
+controllers/
+services/
+public/
+files/
+data/
 
 Base inicial del laboratorio Node.js + Express funcionando en local.
 
@@ -22,37 +33,111 @@ Las 8 vulnerabilidades planificadas para la actividad son:
 6. Broken Authentication
 7. Sensitive Data Exposure / Cryptographic Failures
 8. Security Misconfiguration
+---
 
-## Estrategia de trabajo
+2. Ramas principales del proyecto
 
- main-vulnerable: versión vulnerable de la aplicación
- main-secure: versión securizada equivalente
-Se trabajará vulnerabilidad por vulnerabilidad, implementando cada pareja:
- versión vulnerable
- versión secure
+main-vulnerable
+
+Versión vulnerable de la aplicación, con todas las vulnerabilidades activas y demostrables.
+
+main-secure
+
+Versión securizada con las mismas funcionalidades, pero corregidas mediante validación, parametrización, control de sesión, enmascarado de datos, manejo seguro de errores, etc.
 
 ---
 
- ### Módulo 1 completado: DOM-based XSS
+3. Tecnologías utilizadas
 
-**Categoría:** OWASP Top 10 - Injection / XSS  
-**Estado:** completado en versión vulnerable y versión segura
+Node.js
+Express
+SQLite3
+express-session
+Multer
+JavaScript
+HTML/CSS
 
-**Descripción funcional**  
-Se ha añadido un nuevo módulo DOM XSS accesible desde la portada de la aplicación.  
-Ambas versiones mantienen la misma funcionalidad: el usuario introduce texto en un campo y dicho contenido se refleja dinámicamente en el DOM al pulsar el botón 'Mostrar'.
+---
 
-**Versión vulnerable**  
+4. Instalación y ejecución
+
+4.1. Requisitos previos
+
+Node.js instalado
+npm instalado
+Git
+
+4.2. Clonar el repositorio (el main es la base, las ramas vulnerable y safe estan independientes)
+
+git clone https://github.com/Shaston/AC1_euVWA_JCT/tree/main
+cd AC1_euVWA_JCT
+
+4.3. Ejecutar la versión vulnerable
+
+git checkout main-vulnerable
+npm install
+PORT=3001 npm start
+
+Acceso: http://localhost:3001
+
+4.4. Ejecutar la versión segura
+
+git checkout main-secure
+npm install
+NODE_ENV=production PORT=3002 npm start
+
+Acceso:  http://localhost:3002
+
+A destacar que se usan puertos diferentes para comparar ambas versiones en paralelo en las pruebas, para no tener que estar parando y arrancando. 
+
+
+5. Tabla comparativa de correcciones aplicadas
+
+INSERTAR TABLA (del punto 6)
+
+
+
+6. Evidencias y explotación de las vulnerabilidades
+
+6.1 Módulo 1 — DOM-based XSS
+
+Categoría:OWASP Top 10 - Injection / XSS  
+
+**Descripción**
+
+Se implementa una funcionalidad que refleja dinámicamente texto introducido por el usuario en el DOM.
+
+En la versión vulnerable se usa innerHTML.
+En la versión segura se usa textContent.
+
+**Version vulnerable**
 La versión vulnerable inserta la entrada del usuario usando 'innerHTML'.  
 Esto permite que el navegador interprete la entrada como HTML y ejecute código inyectado, provocando una vulnerabilidad de tipo DOM-based XSS.
 
-**Versión segura**  
+**Versión segura**
 La versión segura inserta la entrada del usuario usando 'textContent'.  
 De este modo, la entrada se trata como texto plano y no como HTML interpretable, evitando la ejecución del payload en este contexto.
 
 **Pruebas realizadas**  
 Payload de prueba 1:
-<b>hola</b> entre otras 
+<b>hola</b>
+
+Payload 2 (ejecución JavaScript):
+<img src=x onerror=alert('XSS')>
+
+Vulnerable
+
+<b>hola</b> se renderiza en negrita.
+<img src=x onerror=alert('XSS')> ejecuta el alert.
+
+INSERTAR IMAGENES
+
+Segura
+
+Ambos payloads se muestran como texto.
+No se ejecuta JavaScript.
+
+INSERTAR IMAGENES
 
 ---
 
