@@ -197,3 +197,30 @@ Prueba 4:
 - Se devuelve un mensaje genérico `Internal Server Error` sin stack trace visible.
 
 ---
+
+### Módulo 7 completado: Broken Authentication
+
+**Categoría:** OWASP Top 10 - Broken Authentication / Session Management  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un módulo de autenticación para comparar una gestión insegura del estado autenticado frente a una gestión basada en sesión servidor-side.
+
+**Versión vulnerable**  
+La versión vulnerable toma el estado autenticado directamente desde parámetros de URL (`user`, `role`, `auth`).  
+Esto permite suplantar identidad y acceder al panel sin login real simplemente manipulando la URL.
+
+**Versión segura**  
+La versión segura utiliza `express-session` para mantener el estado autenticado en el servidor, almacenando únicamente el identificador de sesión en una cookie.  
+Además, regenera la sesión tras el login y utiliza atributos de cookie como `HttpOnly` y `SameSite`.
+
+**Pruebas realizadas**  
+Prueba 1:
+- Acceso directo a:
+
+/auth-vul/panel?user=admin&role=admin&auth=1
+
+En la version segura 
+/auth-safe/panel?user=admin&role=admin&auth=1
+
+---
