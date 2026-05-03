@@ -160,3 +160,40 @@ Prueba 3:
 - El archivo fue aceptado, renombrado y almacenado de forma controlada.
 
 ---
+
+
+### Módulo 6 completado: Security Misconfiguration
+
+**Categoría:** OWASP Top 10 - Security Misconfiguration  
+**Estado:** completado en versión vulnerable y versión segura
+
+**Descripción funcional**  
+Se ha añadido un módulo orientado a mostrar errores de configuración y exposición innecesaria de información interna.  
+Ambas versiones incluyen rutas relacionadas con configuración y errores, pero difieren en el nivel de información expuesta.
+
+**Versión vulnerable**  
+La versión vulnerable expone un endpoint de debug con información interna del proceso y un endpoint que muestra errores con stack trace completo.  
+Esto facilita la obtención de detalles del entorno y de la estructura interna de la aplicación.
+
+**Versión segura**  
+La versión segura no expone endpoints de debug internos y utiliza un manejador de errores genérico que evita mostrar trazas internas al usuario.  
+Además, se ejecuta en modo producción mediante `NODE_ENV=production`.
+
+**Pruebas realizadas**  
+Prueba 1:
+- Acceso a `/debug-config` en la versión vulnerable.
+- Se muestran detalles internos como `NODE_ENV`, puerto, directorio de trabajo, plataforma y PID.
+
+Prueba 2:
+- Acceso a `/debug-crash` en la versión vulnerable.
+- Se muestra el stack trace completo del error.
+
+Prueba 3:
+- Acceso a `/safe-config` en la versión segura.
+- No se exponen detalles internos de configuración.
+
+Prueba 4:
+- Acceso a `/safe-crash` en la versión segura.
+- Se devuelve un mensaje genérico `Internal Server Error` sin stack trace visible.
+
+---
