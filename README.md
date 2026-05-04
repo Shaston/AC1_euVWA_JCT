@@ -93,7 +93,8 @@ A destacar que se usan puertos diferentes para comparar ambas versiones en paral
 
 5. Tabla comparativa de correcciones aplicadas
 
-INSERTAR TABLA (del punto 6)
+<img width="697" height="548" alt="image" src="https://github.com/user-attachments/assets/0bea9400-bf64-4f0b-855f-20644bbf1986" />
+
 
 
 
@@ -145,7 +146,7 @@ No se ejecuta JavaScript.
 
 ---
 
-### Módulo 2 completado: Blind Command Injection
+6.2. Módulo 2 — Blind Command Injection
 
 **Categoría:** OWASP Top 10 - Injection / OS Command Injection  
 **Estado:** completado en versión vulnerable y versión segura
@@ -157,10 +158,18 @@ Ambas versiones mantienen la misma idea funcional: el usuario introduce un host 
 **Versión vulnerable**  
 La versión vulnerable construye un comando del sistema concatenando directamente la entrada del usuario.  
 No muestra la salida del comando, pero sí el tiempo de respuesta, lo que permite demostrar una blind command injection mediante retardos artificiales.
+La respuesta tarda aproximadamente 5 segundos.
+No se muestra la salida del comando, pero el retraso confirma la inyección.
+<img width="630" height="301" alt="image" src="https://github.com/user-attachments/assets/41847a41-1b2e-4dfb-93c0-5fb96dee4846" />
+
 
 **Versión segura**  
 La versión segura valida el valor recibido y evita por completo invocar comandos del sistema.  
-En su lugar utiliza `dns.lookup()` como API nativa de Node.js para resolver el host, reduciendo de forma clara la superficie de ataque.
+En su lugar utiliza `dns.lookup()` como API nativa de Node.js para resolver el host.
+El valor se rechaza como host inválido o no resoluble.
+No hay retraso provocado por ejecución de shell.
+<img width="573" height="237" alt="image" src="https://github.com/user-attachments/assets/1e38b125-97a9-43e0-99e5-e7d66557c4cc" />
+
 
 **Prueba realizada**  
 Payload de prueba:
