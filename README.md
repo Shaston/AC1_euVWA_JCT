@@ -246,21 +246,34 @@ Prueba owasp
 
 ---
 
-### Módulo 5 completado: Insecure File Upload
+6.5. Módulo 5 — Insecure File Upload
 
 **Categoría:** OWASP Top 10 - Insecure File Upload  
-**Estado:** completado en versión vulnerable y versión segura
 
-**Descripción funcional**  
-Se ha añadido un módulo de subida de archivos.  
+**Descripción**  
 Ambas versiones permiten subir un archivo, pero difieren en las validaciones aplicadas y en la forma de almacenarlo/publicarlo.
+En la versión vulnerable se aceptan archivos sin restricciones suficientes y se exponen en una ruta pública.
+En la versión segura solo se permiten .txt, se renombran y no se publican directamente.
 
 **Versión vulnerable**  
 La versión vulnerable acepta archivos sin restricciones suficientes, conserva el nombre original y los deja accesibles desde una ruta pública servida por la aplicación.  
 Esto permite subir contenido activo, como un archivo HTML con JavaScript embebido, y ejecutarlo posteriormente desde el navegador.
+prueba.html se sube.
+El archivo queda accesible en /uploads/prueba.html.
+<img width="663" height="336" alt="image" src="https://github.com/user-attachments/assets/c73a742d-1310-4257-93c3-3797485c84fe" />
+
+Al abrirlo, se ejecuta el alert.
+<img width="1021" height="620" alt="image" src="https://github.com/user-attachments/assets/58775c73-c1d4-4c33-a535-f00557ca64a0" />
+
 
 **Versión segura**  
 La versión segura solo permite archivos `.txt`, aplica límite de tamaño, renombra el archivo antes de almacenarlo y no lo expone mediante una ruta pública directa.
+prueba.html es rechazado.
+<img width="751" height="283" alt="image" src="https://github.com/user-attachments/assets/36881869-ffdb-4206-9966-8b39f7e40180" />
+
+nota.txt es aceptado, renombrado y almacenado de forma controlada.
+<img width="782" height="370" alt="image" src="https://github.com/user-attachments/assets/3a1949f9-5472-4cba-aa78-3eee2ec9f91f" />
+
 
 **Pruebas realizadas**  
 Prueba 1:
@@ -278,22 +291,39 @@ Prueba 3:
 ---
 
 
-### Módulo 6 completado: Security Misconfiguration
+6.6. Módulo 6 — Security Misconfiguration
 
 **Categoría:** OWASP Top 10 - Security Misconfiguration  
-**Estado:** completado en versión vulnerable y versión segura
 
 **Descripción funcional**  
-Se ha añadido un módulo orientado a mostrar errores de configuración y exposición innecesaria de información interna.  
+Muestra errores de configuración y exposición innecesaria de información interna.  
 Ambas versiones incluyen rutas relacionadas con configuración y errores, pero difieren en el nivel de información expuesta.
+Ruta vulnerable: /debug-config, /debug-crash
+Ruta segura: /safe-config, /safe-crash
+Se implementan rutas relacionadas con depuración y errores.
+
+En la versión vulnerable se expone configuración interna y stack trace.
+En la versión segura se ocultan detalles internos y se responde con error genérico.
 
 **Versión vulnerable**  
 La versión vulnerable expone un endpoint de debug con información interna del proceso y un endpoint que muestra errores con stack trace completo.  
 Esto facilita la obtención de detalles del entorno y de la estructura interna de la aplicación.
 
+<img width="781" height="419" alt="image" src="https://github.com/user-attachments/assets/e4bd26a3-e5b1-4df1-afe6-c29509152569" />
+Se exponen variables internas y stack trace completo.
+<img width="786" height="284" alt="image" src="https://github.com/user-attachments/assets/255be2c6-a3b0-4033-9afb-cb665c7edc82" />
+
+
 **Versión segura**  
 La versión segura no expone endpoints de debug internos y utiliza un manejador de errores genérico que evita mostrar trazas internas al usuario.  
 Además, se ejecuta en modo producción mediante `NODE_ENV=production`.
+
+No se exponen detalles internos.
+<img width="793" height="295" alt="image" src="https://github.com/user-attachments/assets/37f00018-51ba-4a47-b0fb-1e3b58191ad7" />
+
+Se devuelve un error genérico.
+<img width="838" height="310" alt="image" src="https://github.com/user-attachments/assets/1fbf753b-45ca-423b-83ae-16d766a7d427" />
+
 
 **Pruebas realizadas**  
 Prueba 1:
