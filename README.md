@@ -463,12 +463,22 @@ imagen oficial de Node basada en Debian (node:22-bookworm-slim) para mejorar la 
 10. docker uso
 En las ramas de main vulnerable y main secure estan los ficheros Dockerfile y .dockerignore con los que podras montar el propio docker.. los comando a lanzar serian los siguientes.
 
-Para vulnerable:
+Importante para abrirlo correctamente, aunque el enlace mande al puerto 3000, hay que poner el 3001 o 3002
+- Nota: dentro del contenedor la aplicación escucha en el puerto `3000`.
+- Docker publica ese puerto en el host usando `-p`.
+- Por eso, con `-p 3001:3000`, la versión vulnerable se abre desde el navegador en `http://localhost:3001`.
+
+Para vulnerable (si hay fallo o problema, usar sudo para hacer el docker build en caso de linux):
 docker build -t euvwa-vulnerable .
 
 docker run --rm -p 3001:3000 -e PORT=3000 euvwa-vulnerable
 
-Para secure:
+Para secure (si hay fallo o problema, usar sudo para hacer el docker build en caso de linux):
 docker build -t euvwa-secure .
 
 docker run --rm -p 3002:3000 -e PORT=3000 -e NODE_ENV=production -e SESSION_SECRET=lab-secret-demo euvwa-secure
+
+Probando docker con el 2º lab, anteriormente ya probé el vulnerable.
+
+<img width="1057" height="915" alt="image" src="https://github.com/user-attachments/assets/54ca46f0-7a4b-43de-9117-f36d9786241a" />
+
