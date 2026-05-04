@@ -178,7 +178,7 @@ Payload de prueba:
 
 ---
 
-7.3. Módulo 3 — Path Traversal / Arbitrary File Download
+6.3. Módulo 3 — Path Traversal / Arbitrary File Download
 
 **Categoría:** OWASP Top 10 - File Inclusion / Path Traversal  
 
@@ -208,22 +208,32 @@ Payload de prueba 1:
 Payload 2 fichero permitido en versión segura:
 fichero_public.txt
 
-### Módulo 4 completado: SQL Injection Login
+6.4. Módulo 4 — SQL Injection Login
 
 **Categoría:** OWASP Top 10 - Injection / SQL Injection  
-**Estado:** completado en versión vulnerable y versión segura
 
 **Descripción funcional**  
 Se ha añadido un módulo de autenticación simple basado en SQLite.  
 Ambas versiones permiten iniciar sesión con un usuario de prueba (`admin / admin123`), pero difieren en la forma de construir la consulta SQL.
+Se implementa un login basado en SQLite.
+En la versión vulnerable la consulta SQL se construye por concatenación.
+En la versión segura se usan consultas parametrizadas.
 
 **Versión vulnerable**  
 La versión vulnerable concatena directamente la entrada del usuario dentro de la sentencia SQL.  
 Esto permite alterar la consulta y provocar un bypass de autenticación mediante SQL Injection.
+El login se realiza con el payload de inyección.
+<img width="751" height="349" alt="image" src="https://github.com/user-attachments/assets/5d5c1986-1208-4f86-a6bf-4b93ebe39170" />
+
 
 **Versión segura**  
 La versión segura utiliza consultas parametrizadas (`?`) con binding de valores, separando claramente la lógica SQL de los datos suministrados por el usuario.  
 Además, aplica una validación básica de entrada.
+El payload falla como credenciales inválidas.
+<img width="659" height="289" alt="image" src="https://github.com/user-attachments/assets/fe8271b9-c09c-4b42-974e-0b587b5352a9" />
+El login legítimo funciona.
+<img width="649" height="321" alt="image" src="https://github.com/user-attachments/assets/da744ffc-95ed-4872-812f-04a6a8a02284" />
+
 
 **Pruebas realizadas**  
 Prueba legítima:
