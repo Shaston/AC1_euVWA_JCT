@@ -295,7 +295,7 @@ Prueba 3:
 
 **Categoría:** OWASP Top 10 - Security Misconfiguration  
 
-**Descripción funcional**  
+**Descripción**  
 Muestra errores de configuración y exposición innecesaria de información interna.  
 Ambas versiones incluyen rutas relacionadas con configuración y errores, pero difieren en el nivel de información expuesta.
 Ruta vulnerable: /debug-config, /debug-crash
@@ -344,21 +344,36 @@ Prueba 4:
 
 ---
 
-### Módulo 7 completado: Broken Authentication
+6.7. Módulo 7 — Broken Authentication / Session Management
 
 **Categoría:** OWASP Top 10 - Broken Authentication / Session Management  
-**Estado:** completado en versión vulnerable y versión segura
+Ruta vulnerable: /auth-vul/login, /auth-vul/panel
+Ruta segura: /auth-safe/login, /auth-safe/panel
 
-**Descripción funcional**  
-Se ha añadido un módulo de autenticación para comparar una gestión insegura del estado autenticado frente a una gestión basada en sesión servidor-side.
+**Descripción**  
+comparar una gestión insegura del estado autenticado frente a una gestión basada en sesión servidor-side.
+Se compara una autenticación rota basada en parámetros de URL frente a una autenticación basada en sesión servidor-side.
+
+En la versión vulnerable el estado autenticado depende de parámetros manipulables.
+En la versión segura el estado depende de express-session.
 
 **Versión vulnerable**  
 La versión vulnerable toma el estado autenticado directamente desde parámetros de URL (`user`, `role`, `auth`).  
 Esto permite suplantar identidad y acceder al panel sin login real simplemente manipulando la URL.
+El panel concede acceso sin login real.
+<img width="784" height="306" alt="image" src="https://github.com/user-attachments/assets/6aa61de3-524d-4cba-b5c7-749b55def708" />
+
 
 **Versión segura**  
 La versión segura utiliza `express-session` para mantener el estado autenticado en el servidor, almacenando únicamente el identificador de sesión en una cookie.  
 Además, regenera la sesión tras el login y utiliza atributos de cookie como `HttpOnly` y `SameSite`.
+El panel no concede acceso usando parámetros en URL.
+<img width="806" height="312" alt="image" src="https://github.com/user-attachments/assets/ca30aa82-d057-489b-81f9-fb0022a413de" />
+El equivalente en este caso es ponerlo en la url "/auth-safe/panel?user=admin&role=admin&auth=1"
+
+El acceso solo se concede mediante login válido y sesión activa.
+<img width="757" height="294" alt="image" src="https://github.com/user-attachments/assets/fc9b381b-7fcf-4c34-a724-b57304bc804f" />
+
 
 **Pruebas realizadas**  
 Prueba 1:
