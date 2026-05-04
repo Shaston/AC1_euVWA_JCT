@@ -461,7 +461,12 @@ Probar la aplicación sin instalar dependencias Node.js directamente en el siste
 imagen oficial de Node basada en Debian (node:22-bookworm-slim) para mejorar la compatibilidad con dependencias nativas como sqlite3 y facilitar la ejecución tanto en equipos amd64 como en equipos Apple Silicon arm64.
 
 10. docker uso
+En las ramas de main vulnerable y main secure estan los ficheros Dockerfile y .dockerignore con los que podras montar el propio docker.. los comando a lanzar serian los siguientes.
 
+Para vulnerable:
+docker build -t euvwa-vulnerable .
+docker run --rm -p 3001:3000 -e PORT=3000 euvwa-vulnerable
 
-
-
+Para secure:
+docker build -t euvwa-secure .
+docker run --rm -p 3002:3000 -e PORT=3000 -e NODE_ENV=production -e SESSION_SECRET=lab-secret-demo euvwa-secure
