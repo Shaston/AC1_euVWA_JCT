@@ -453,6 +453,15 @@ La rama main-secure contiene las correcciones equivalentes.
 La rama main se utiliza como documentación principal del proyecto.
 La aplicación ha sido probada en local utilizando puertos separados para facilitar la comparación.
 
+---
+
+9. docker opcional
+Probar la aplicación sin instalar dependencias Node.js directamente en el sistema anfitrión.
+
+imagen oficial de Node basada en Debian (node:22-bookworm-slim) para mejorar la compatibilidad con dependencias nativas como sqlite3 y facilitar la ejecución tanto en equipos amd64 como en equipos Apple Silicon arm64.
+
+10. docker uso
+
 
 
 
