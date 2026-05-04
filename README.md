@@ -386,21 +386,32 @@ En la version segura
 
 ---
 
-### Módulo 8 completado: Sensitive Data Exposure / Cryptographic Failures
+6.8. Módulo 8 — Sensitive Data Exposure / Cryptographic Failures
 
 **Categoría:** OWASP Top 10 - Sensitive Data Exposure / Cryptographic Failures  
-**Estado:** completado en versión vulnerable y versión segura
+Ruta vulnerable: /sensitive-vul/profile
+Ruta segura: /sensitive-safe/profile
 
 **Descripción funcional**  
-Se ha añadido un módulo de perfil de usuario demo para mostrar el tratamiento inseguro y seguro de datos sensibles.
+módulo de perfil de usuario demo para mostrar el tratamiento inseguro y seguro de datos sensibles.
+Se implementa una ficha de usuario demo para comparar exposición insegura y tratamiento más seguro de datos sensibles.
+
+En la versión vulnerable se exponen datos sensibles en claro.
+En la versión segura se minimizan datos, se enmascaran secretos y la contraseña se representa mediante hash derivado con scrypt.
 
 **Versión vulnerable**  
 La versión vulnerable expone datos sensibles en claro, incluyendo contraseña, número de tarjeta completo, API key completa y notas internas.  
 Además, utiliza una codificación débil (`base64`) para una contraseña de backup, lo que no aporta protección criptográfica real.
+Se muestran directamente contraseña, tarjeta completa, API key y nota completa.
+<img width="824" height="441" alt="image" src="https://github.com/user-attachments/assets/f6fc9d5d-83d3-4010-a5d9-4bb4b20df817" />
+
 
 **Versión segura**  
 La versión segura minimiza la exposición de datos sensibles, enmascara valores críticos y sustituye la contraseña en claro por un hash derivado mediante `scrypt`.  
 También redacciona la información innecesaria que no debe mostrarse al cliente.
+Se muestra passwordHash derivado con scrypt, tarjeta aparece enmascarada, API key truncada y la nota aparece redactada.
+<img width="1175" height="372" alt="image" src="https://github.com/user-attachments/assets/6254cf63-ccd6-4564-9be6-bd1098d3f2c1" />
+
 
 **Pruebas realizadas**  
 Prueba 1:
@@ -421,3 +432,27 @@ Prueba 2:
   - `personalNote` redacted
 
 ---
+7. Estructura del proyecto
+
+controllers/
+routes/
+services/
+public/
+files/
+data/
+app.js
+package.json
+
+La estructura separa controladores, rutas, servicios y recursos auxiliares para mantener el proyecto organizado y la comparación entre las dos ramas principales.
+
+---
+8. Ramas/branchs
+
+La rama main-vulnerable contiene las implementaciones explotables.
+La rama main-secure contiene las correcciones equivalentes.
+La rama main se utiliza como documentación principal del proyecto.
+La aplicación ha sido probada en local utilizando puertos separados para facilitar la comparación.
+
+
+
+
