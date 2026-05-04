@@ -178,27 +178,35 @@ Payload de prueba:
 
 ---
 
-### Módulo 3 completado: Path Traversal / Arbitrary File Download
+7.3. Módulo 3 — Path Traversal / Arbitrary File Download
 
 **Categoría:** OWASP Top 10 - File Inclusion / Path Traversal  
-**Estado:** completado en versión vulnerable y versión segura
 
-**Descripción funcional**  
-Se ha añadido un nuevo módulo de descarga de ficheros.  
+**Descripción funcional**   
 Ambas versiones permiten solicitar un archivo para su descarga, pero difieren en la forma de validar el nombre y la ruta solicitada.
+En la versión vulnerable se construye la ruta sin validación suficiente.
+En la versión segura se utiliza allowlist y comprobación de ruta resuelta.
 
 **Versión vulnerable**  
 La versión vulnerable construye la ruta de descarga a partir de la entrada del usuario sin validación suficiente.  
 Esto permite descargar archivos fuera del directorio previsto mediante secuencias de path traversal.
+<img width="1096" height="419" alt="image" src="https://github.com/user-attachments/assets/575fb228-9e5b-4859-977b-9501c289e51f" />
+
 
 **Versión segura**  
 La versión segura limita los nombres permitidos mediante una allowlist y resuelve la ruta final con `path.resolve()`, comprobando que permanezca dentro del directorio autorizado antes de descargar el fichero.
+<img width="783" height="238" alt="image" src="https://github.com/user-attachments/assets/ea16d6b7-737a-43c0-9f0c-beee86d0e561" />
+Haciendo la misma prueba que en vulnerable y usando el fichero permitido.
+<img width="976" height="472" alt="image" src="https://github.com/user-attachments/assets/c99509f3-0014-4d3c-ad50-371de5dc1239" />
+
 
 **Pruebas realizadas**  
 Payload de prueba 1:
 
 ../package.json
 
+Payload 2 fichero permitido en versión segura:
+fichero_public.txt
 
 ### Módulo 4 completado: SQL Injection Login
 
