@@ -465,8 +465,10 @@ En las ramas de main vulnerable y main secure estan los ficheros Dockerfile y .d
 
 Para vulnerable:
 docker build -t euvwa-vulnerable .
+
 docker run --rm -p 3001:3000 -e PORT=3000 euvwa-vulnerable
 
 Para secure:
 docker build -t euvwa-secure .
+
 docker run --rm -p 3002:3000 -e PORT=3000 -e NODE_ENV=production -e SESSION_SECRET=lab-secret-demo euvwa-secure
