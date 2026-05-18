@@ -5,3 +5,10 @@ __MACOSX/
 npm-debug.log*
 coverage/
 .vscode/
+
+data/*.db
+uploads/
+uploads_safe/
+
+reports/*
+!reports/.gitkeep
