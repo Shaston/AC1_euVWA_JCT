@@ -18,6 +18,7 @@ jobs:
 
     permissions:
       contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -555,6 +556,36 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_ENV, `SECURITY_GATE_FAILED=${gateFailed ? "true" : "false"}\n`);
           fs.appendFileSync(process.env.GITHUB_ENV, `SECURITY_GATE_REASON=${reason.replace(/\n/g, " ")}\n`);
           EOF
+
+      - name: Prepare GHCR image metadata
+        if: github.ref_name == 'main-secure' && env.SECURITY_GATE_FAILED == 'false'
+        run: |
+          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=secure-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Login to GitHub Container Registry
+        if: github.ref_name == 'main-secure' && env.SECURITY_GATE_FAILED == 'false'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Publish secure Docker image to GHCR
+        if: github.ref_name == 'main-secure' && env.SECURITY_GATE_FAILED == 'false'
+        run: |
+          docker tag euvwa:ci "$IMAGE_NAME:$IMAGE_TAG"
+          docker tag euvwa:ci "$IMAGE_NAME:secure-latest"
+
+          docker push "$IMAGE_NAME:$IMAGE_TAG"
+          docker push "$IMAGE_NAME:secure-latest"
+
+          echo "# Published Docker image" > reports/published-image.md
+          echo "" >> reports/published-image.md
+          echo "- Registry: GitHub Container Registry" >> reports/published-image.md
+          echo "- Image: $IMAGE_NAME" >> reports/published-image.md
+          echo "- Tags:" >> reports/published-image.md
+          echo "  - $IMAGE_TAG" >> reports/published-image.md
+          echo "  - secure-latest" >> reports/published-image.md
+          echo "- Published from branch: $GITHUB_REF_NAME" >> reports/published-image.md
+          echo "- Commit: $GITHUB_SHA" >> reports/published-image.md
 
       - name: Upload pipeline reports
         if: always()
