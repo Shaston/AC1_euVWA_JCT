@@ -9,8 +9,14 @@ RUN apt-get update \
 COPY . .
 
 RUN rm -rf node_modules \
-    && npm_config_build_from_source=true npm ci --omit=dev
+    && npm_config_build_from_source=true npm ci --omit=dev \
+    && mkdir -p data uploads uploads_safe \
+    && groupadd -r appuser \
+    && useradd --no-log-init -r -g appuser appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "app.js"]

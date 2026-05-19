@@ -151,7 +151,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t euvwa:${{ github.ref_name }} .
+          docker build -t euvwa:ci .
 
       - name: Start application for DAST
         run: |
@@ -162,7 +162,7 @@ jobs:
             --network secdevops-net \
             -p 3000:3000 \
             -e PORT=3000 \
-            euvwa:${{ github.ref_name }}
+            euvwa:ci
 
           echo "Waiting for application to be ready..."
           for i in {1..30}; do
@@ -377,7 +377,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'image'
-          image-ref: 'euvwa:${{ github.ref_name }}'
+          image-ref: 'euvwa:ci'
           format: 'json'
           output: 'reports/trivy-image-report.json'
           exit-code: '0'
