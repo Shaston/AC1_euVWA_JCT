@@ -1,0 +1,63 @@
+name: SecDevOps Pipeline
+
+on:
+  push:
+    branches:
+      - main-vulnerable
+      - main-secure
+  pull_request:
+    branches:
+      - main-vulnerable
+      - main-secure
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    name: Baseline build and validation
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Show project metadata
+        run: |
+          mkdir -p reports
+          echo "# SecDevOps baseline report" > reports/baseline-report.md
+          echo "" >> reports/baseline-report.md
+          echo "- Branch: $GITHUB_REF_NAME" >> reports/baseline-report.md
+          echo "- Commit: $GITHUB_SHA" >> reports/baseline-report.md
+          echo "- Node version: $(node -v)" >> reports/baseline-report.md
+          echo "- npm version: $(npm -v)" >> reports/baseline-report.md
+          echo "- Date: $(date -u)" >> reports/baseline-report.md
+
+      - name: Validate application startup
+        run: |
+          timeout 10s npm start || code=$?
+          if [ "${code:-0}" = "124" ]; then
+            echo "Application started successfully and was stopped after timeout."
+            exit 0
+          fi
+          exit ${code:-0}
+
+      - name: Build Docker image
+        run: |
+          docker build -t euvwa:${{ github.ref_name }} .
+
+      - name: Upload baseline report
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-report-${{ github.ref_name }}
+          path: reports/baseline-report.md
