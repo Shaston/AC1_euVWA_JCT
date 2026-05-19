@@ -155,7 +155,14 @@ jobs:
 
       - name: Start application for DAST
         run: |
-          docker run -d --name euvwa-dast -p 3000:3000 -e PORT=3000 euvwa:${{ github.ref_name }}
+          docker network create secdevops-net || true
+
+          docker run -d \
+            --name euvwa-dast \
+            --network secdevops-net \
+            -p 3000:3000 \
+            -e PORT=3000 \
+            euvwa:${{ github.ref_name }}
 
           echo "Waiting for application to be ready..."
           for i in {1..30}; do
@@ -173,16 +180,21 @@ jobs:
       - name: Run DAST with OWASP ZAP Baseline
         run: |
           mkdir -p reports/zap
+          chmod 777 reports/zap
+
           docker run --rm \
-            --network host \
+            --network secdevops-net \
             -v ${{ github.workspace }}/reports/zap:/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://127.0.0.1:3000 \
+            -t http://euvwa-dast:3000 \
             -J zap-report.json \
             -r zap-report.html \
             -w zap-report.md \
             -I || true
+
+          echo "ZAP output files:"
+          ls -la reports/zap || true
 
       - name: Generate ZAP summary
         if: always()
@@ -305,6 +317,7 @@ jobs:
           docker logs euvwa-dast || true
           docker stop euvwa-dast || true
           docker rm euvwa-dast || true
+          docker network rm secdevops-net || true
 
       - name: Upload pipeline reports
         if: always()
