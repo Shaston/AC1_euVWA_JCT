@@ -97,6 +97,38 @@ jobs:
           fs.writeFileSync("reports/semgrep-summary.md", md);
           EOF
 
+      - name: Run dependency and filesystem scan with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'reports/trivy-fs-report.json'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Generate SBOM with Trivy CycloneDX
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'cyclonedx'
+          output: 'reports/sbom-cyclonedx.json'
+          exit-code: '0'
+
+      - name: Scan generated SBOM with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'sbom'
+          scan-ref: 'reports/sbom-cyclonedx.json'
+          format: 'json'
+          output: 'reports/trivy-sbom-report.json'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
       - name: Show project metadata
         run: |
           mkdir -p reports
@@ -120,6 +152,78 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t euvwa:${{ github.ref_name }} .
+
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'image'
+          image-ref: 'euvwa:${{ github.ref_name }}'
+          format: 'json'
+          output: 'reports/trivy-image-report.json'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Generate Trivy summary
+        if: always()
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+
+          function countVulnerabilities(file) {
+            if (!fs.existsSync(file)) {
+              return { total: 0, bySeverity: {} };
+            }
+
+            const data = JSON.parse(fs.readFileSync(file, "utf8"));
+            const results = data.Results || [];
+            const bySeverity = {};
+            let total = 0;
+
+            for (const result of results) {
+              const vulns = result.Vulnerabilities || [];
+              for (const vuln of vulns) {
+                total++;
+                const sev = vuln.Severity || "UNKNOWN";
+                bySeverity[sev] = (bySeverity[sev] || 0) + 1;
+              }
+            }
+
+            return { total, bySeverity };
+          }
+
+          const scans = [
+            ["Filesystem / dependencies", "reports/trivy-fs-report.json"],
+            ["SBOM", "reports/trivy-sbom-report.json"],
+            ["Docker image", "reports/trivy-image-report.json"]
+          ];
+
+          let md = "# Trivy security report\n\n";
+          md += `- Branch: ${process.env.GITHUB_REF_NAME}\n`;
+          md += `- Commit: ${process.env.GITHUB_SHA}\n\n`;
+
+          for (const [name, file] of scans) {
+            const result = countVulnerabilities(file);
+            md += `## ${name}\n\n`;
+            md += `- Total vulnerabilities: ${result.total}\n`;
+
+            if (Object.keys(result.bySeverity).length === 0) {
+              md += "- No vulnerabilities reported in this scan output.\n\n";
+              continue;
+            }
+
+            md += "\n### By severity\n\n";
+            for (const severity of ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]) {
+              if (result.bySeverity[severity]) {
+                md += `- ${severity}: ${result.bySeverity[severity]}\n`;
+              }
+            }
+            md += "\n";
+          }
+
+          fs.writeFileSync("reports/trivy-summary.md", md);
+          EOF
 
       - name: Upload pipeline reports
         if: always()
