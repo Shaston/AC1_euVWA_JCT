@@ -203,10 +203,67 @@ jobs:
           const fs = require("fs");
 
           const zapJson = "reports/zap/zap-report.json";
+          const target = "http://euvwa-dast:3000";
+
+          function stripHtml(value) {
+            return String(value || "")
+              .replace(/<[^>]*>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+          }
+
+          function cleanCell(value, max = 120) {
+            const text = stripHtml(value)
+              .replace(/\|/g, "/")
+              .replace(/\r?\n|\r/g, " ")
+              .trim();
+
+            if (!text) return "-";
+            return text.length > max ? text.slice(0, max - 3) + "..." : text;
+          }
+
+          function relativeUrl(value) {
+            if (!value) return "-";
+            return String(value).replace(target, "") || "/";
+          }
+
+          function normalizeRisk(riskdesc) {
+            const raw = String(riskdesc || "UNKNOWN");
+            const risk = raw.split(" ")[0];
+            return risk || "UNKNOWN";
+          }
+
+          function extractConfidence(riskdesc, confidence) {
+            const raw = String(riskdesc || "");
+            const match = raw.match(/\(([^)]+)\)/);
+            if (match) return match[1];
+
+            const map = {
+              "0": "False Positive",
+              "1": "Low",
+              "2": "Medium",
+              "3": "High",
+              "4": "Confirmed"
+            };
+
+            return map[String(confidence || "")] || String(confidence || "UNKNOWN");
+          }
+
+          function riskWeight(risk) {
+            const order = {
+              High: 1,
+              Medium: 2,
+              Low: 3,
+              Informational: 4,
+              UNKNOWN: 5
+            };
+            return order[risk] || 99;
+          }
+
           let md = "# OWASP ZAP DAST report\n\n";
           md += `- Branch: ${process.env.GITHUB_REF_NAME}\n`;
           md += `- Commit: ${process.env.GITHUB_SHA}\n`;
-          md += "- Target: http://127.0.0.1:3000\n\n";
+          md += `- Target: ${target}\n\n`;
 
           if (!fs.existsSync(zapJson)) {
             md += "ZAP report was not generated.\n";
@@ -216,23 +273,100 @@ jobs:
 
           const data = JSON.parse(fs.readFileSync(zapJson, "utf8"));
           const sites = data.site || [];
-          const counts = {};
+
+          const alerts = [];
 
           for (const site of sites) {
-            const alerts = site.alerts || [];
-            for (const alert of alerts) {
-              const risk = alert.riskdesc || alert.riskcode || "UNKNOWN";
-              counts[risk] = (counts[risk] || 0) + 1;
+            for (const alert of site.alerts || []) {
+              const instances = alert.instances || [];
+              const first = instances[0] || {};
+
+              const risk = normalizeRisk(alert.riskdesc);
+              const confidence = extractConfidence(alert.riskdesc, alert.confidence);
+              const count = Number(alert.count || instances.length || 1);
+
+              alerts.push({
+                risk,
+                confidence,
+                name: alert.alert || alert.name || "Unknown alert",
+                count,
+                url: first.uri || "",
+                method: first.method || "",
+                param: first.param || "",
+                evidence: first.evidence || first.otherinfo || "",
+                cweid: alert.cweid || "",
+                wascid: alert.wascid || "",
+                solution: alert.solution || "",
+                desc: alert.desc || ""
+              });
             }
           }
 
-          md += "## Alerts by risk\n\n";
+          alerts.sort((a, b) => {
+            const byRisk = riskWeight(a.risk) - riskWeight(b.risk);
+            if (byRisk !== 0) return byRisk;
+            return a.name.localeCompare(b.name);
+          });
 
-          if (Object.keys(counts).length === 0) {
-            md += "- No alerts reported.\n";
+          const summary = {};
+
+          for (const alert of alerts) {
+            if (!summary[alert.risk]) {
+              summary[alert.risk] = { alertTypes: 0, occurrences: 0 };
+            }
+
+            summary[alert.risk].alertTypes += 1;
+            summary[alert.risk].occurrences += alert.count;
+          }
+
+          md += "## Resumen por riesgo\n\n";
+          md += "| Riesgo | Tipos de alerta | Ocurrencias |\n";
+          md += "|---|---:|---:|\n";
+
+          for (const risk of ["High", "Medium", "Low", "Informational", "UNKNOWN"]) {
+            if (summary[risk]) {
+              md += `| ${risk} | ${summary[risk].alertTypes} | ${summary[risk].occurrences} |\n`;
+            }
+          }
+
+          md += "\n## Alertas detectadas agrupadas\n\n";
+          md += "| Riesgo | Confianza | Alerta | Ocurrencias | URL ejemplo | Método | Parámetro/Cabecera | Evidencia | CWE/WASC |\n";
+          md += "|---|---|---|---:|---|---|---|---|---|\n";
+
+          if (alerts.length === 0) {
+            md += "| - | - | Sin alertas | 0 | - | - | - | - | - |\n";
           } else {
-            for (const [risk, total] of Object.entries(counts)) {
-              md += `- ${risk}: ${total}\n`;
+            for (const alert of alerts) {
+              const cwe = alert.cweid ? `CWE-${alert.cweid}` : "-";
+              const wasc = alert.wascid ? `WASC-${alert.wascid}` : "-";
+
+              md += `| ${cleanCell(alert.risk)} `;
+              md += `| ${cleanCell(alert.confidence)} `;
+              md += `| ${cleanCell(alert.name)} `;
+              md += `| ${alert.count} `;
+              md += `| ${cleanCell(relativeUrl(alert.url), 90)} `;
+              md += `| ${cleanCell(alert.method, 20)} `;
+              md += `| ${cleanCell(alert.param, 60)} `;
+              md += `| ${cleanCell(alert.evidence, 90)} `;
+              md += `| ${cwe} / ${wasc} |\n`;
+            }
+          }
+
+          md += "\n## Detalle técnico resumido\n\n";
+
+          if (alerts.length === 0) {
+            md += "No se han detectado alertas en el informe JSON de ZAP.\n";
+          } else {
+            for (const alert of alerts) {
+              md += `### ${alert.risk} - ${cleanCell(alert.name, 120)}\n\n`;
+              md += `- **Confianza:** ${cleanCell(alert.confidence)}\n`;
+              md += `- **Ocurrencias:** ${alert.count}\n`;
+              md += `- **URL ejemplo:** ${cleanCell(relativeUrl(alert.url), 160)}\n`;
+              md += `- **Parámetro/Cabecera:** ${cleanCell(alert.param, 120)}\n`;
+              md += `- **Evidencia:** ${cleanCell(alert.evidence, 160)}\n`;
+              md += `- **CWE/WASC:** ${alert.cweid ? "CWE-" + alert.cweid : "-"} / ${alert.wascid ? "WASC-" + alert.wascid : "-"}\n`;
+              md += `- **Descripción:** ${cleanCell(alert.desc, 260)}\n`;
+              md += `- **Recomendación:** ${cleanCell(alert.solution, 260)}\n\n`;
             }
           }
 
