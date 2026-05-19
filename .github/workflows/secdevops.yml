@@ -153,6 +153,80 @@ jobs:
         run: |
           docker build -t euvwa:${{ github.ref_name }} .
 
+      - name: Start application for DAST
+        run: |
+          docker run -d --name euvwa-dast -p 3000:3000 -e PORT=3000 euvwa:${{ github.ref_name }}
+
+          echo "Waiting for application to be ready..."
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:3000 > /dev/null; then
+              echo "Application is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "Application did not start in time."
+          docker logs euvwa-dast || true
+          exit 1
+
+      - name: Run DAST with OWASP ZAP Baseline
+        run: |
+          mkdir -p reports/zap
+          docker run --rm \
+            --network host \
+            -v ${{ github.workspace }}/reports/zap:/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:3000 \
+            -J zap-report.json \
+            -r zap-report.html \
+            -w zap-report.md \
+            -I || true
+
+      - name: Generate ZAP summary
+        if: always()
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+
+          const zapJson = "reports/zap/zap-report.json";
+          let md = "# OWASP ZAP DAST report\n\n";
+          md += `- Branch: ${process.env.GITHUB_REF_NAME}\n`;
+          md += `- Commit: ${process.env.GITHUB_SHA}\n`;
+          md += "- Target: http://127.0.0.1:3000\n\n";
+
+          if (!fs.existsSync(zapJson)) {
+            md += "ZAP report was not generated.\n";
+            fs.writeFileSync("reports/zap-summary.md", md);
+            process.exit(0);
+          }
+
+          const data = JSON.parse(fs.readFileSync(zapJson, "utf8"));
+          const sites = data.site || [];
+          const counts = {};
+
+          for (const site of sites) {
+            const alerts = site.alerts || [];
+            for (const alert of alerts) {
+              const risk = alert.riskdesc || alert.riskcode || "UNKNOWN";
+              counts[risk] = (counts[risk] || 0) + 1;
+            }
+          }
+
+          md += "## Alerts by risk\n\n";
+
+          if (Object.keys(counts).length === 0) {
+            md += "- No alerts reported.\n";
+          } else {
+            for (const [risk, total] of Object.entries(counts)) {
+              md += `- ${risk}: ${total}\n`;
+            }
+          }
+
+          fs.writeFileSync("reports/zap-summary.md", md);
+          EOF
+
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -224,6 +298,13 @@ jobs:
 
           fs.writeFileSync("reports/trivy-summary.md", md);
           EOF
+
+      - name: Stop DAST application container
+        if: always()
+        run: |
+          docker logs euvwa-dast || true
+          docker stop euvwa-dast || true
+          docker rm euvwa-dast || true
 
       - name: Upload pipeline reports
         if: always()
