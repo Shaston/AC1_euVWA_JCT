@@ -453,9 +453,127 @@ jobs:
           docker rm euvwa-dast || true
           docker network rm secdevops-net || true
 
+      - name: Evaluate security gate
+        if: always()
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+
+          const zapJson = "reports/zap/zap-report.json";
+          const gateReport = "reports/security-gate-report.md";
+
+          let highTypes = 0;
+          let highOccurrences = 0;
+          let highAlerts = [];
+          let gateFailed = false;
+          let reason = "";
+
+          function normalizeRisk(riskdesc) {
+            const raw = String(riskdesc || "UNKNOWN");
+            return raw.split(" ")[0] || "UNKNOWN";
+          }
+
+          function clean(value, max = 180) {
+            const text = String(value || "")
+              .replace(/<[^>]*>/g, " ")
+              .replace(/\|/g, "/")
+              .replace(/\s+/g, " ")
+              .trim();
+
+            if (!text) return "-";
+            return text.length > max ? text.slice(0, max - 3) + "..." : text;
+          }
+
+          if (!fs.existsSync(zapJson)) {
+            gateFailed = true;
+            reason = "ZAP report was not generated. DAST evidence is missing.";
+          } else {
+            const data = JSON.parse(fs.readFileSync(zapJson, "utf8"));
+
+            for (const site of data.site || []) {
+              for (const alert of site.alerts || []) {
+                const risk = normalizeRisk(alert.riskdesc);
+
+                if (risk === "High") {
+                  const instances = alert.instances || [];
+                  const count = Number(alert.count || instances.length || 1);
+                  const first = instances[0] || {};
+
+                  highTypes += 1;
+                  highOccurrences += count;
+
+                  highAlerts.push({
+                    name: alert.alert || alert.name || "Unknown alert",
+                    count,
+                    url: first.uri || "-",
+                    method: first.method || "-",
+                    param: first.param || "-",
+                    evidence: first.evidence || first.otherinfo || "-",
+                    cweid: alert.cweid || "-",
+                    wascid: alert.wascid || "-"
+                  });
+                }
+              }
+            }
+
+            if (highOccurrences > 0) {
+              gateFailed = true;
+              reason = `DAST detected ${highOccurrences} High risk occurrence(s) in ${highTypes} alert type(s).`;
+            } else {
+              reason = "No High risk DAST alerts detected.";
+            }
+          }
+
+          let md = "# Security Gate Report\n\n";
+          md += `- Branch: ${process.env.GITHUB_REF_NAME}\n`;
+          md += `- Commit: ${process.env.GITHUB_SHA}\n`;
+          md += `- Gate criterion: fail if OWASP ZAP reports any High risk alert\n`;
+          md += `- Gate status: ${gateFailed ? "FAILED" : "PASSED"}\n`;
+          md += `- Reason: ${reason}\n\n`;
+
+          md += "## High risk alerts\n\n";
+
+          if (highAlerts.length === 0) {
+            md += "No High risk alerts were detected.\n";
+          } else {
+            md += "| Alert | Ocurrencias | URL ejemplo | Método | Parámetro/Cabecera | Evidencia | CWE/WASC |\n";
+            md += "|---|---:|---|---|---|---|---|\n";
+
+            for (const alert of highAlerts) {
+              md += `| ${clean(alert.name)} `;
+              md += `| ${alert.count} `;
+              md += `| ${clean(alert.url)} `;
+              md += `| ${clean(alert.method, 30)} `;
+              md += `| ${clean(alert.param, 80)} `;
+              md += `| ${clean(alert.evidence, 120)} `;
+              md += `| ${alert.cweid !== "-" ? "CWE-" + alert.cweid : "-"} / ${alert.wascid !== "-" ? "WASC-" + alert.wascid : "-"} |\n`;
+            }
+          }
+
+          fs.writeFileSync(gateReport, md);
+
+          fs.appendFileSync(process.env.GITHUB_ENV, `SECURITY_GATE_FAILED=${gateFailed ? "true" : "false"}\n`);
+          fs.appendFileSync(process.env.GITHUB_ENV, `SECURITY_GATE_REASON=${reason.replace(/\n/g, " ")}\n`);
+          EOF
+
       - name: Upload pipeline reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: secdevops-reports-${{ github.ref_name }}
           path: reports/
+
+
+      - name: Enforce security gate
+        if: always()
+        run: |
+          echo "Security gate result: $SECURITY_GATE_FAILED"
+          echo "Reason: $SECURITY_GATE_REASON"
+
+          if [ "$SECURITY_GATE_FAILED" = "true" ]; then
+            echo "Security gate failed."
+            cat reports/security-gate-report.md || true
+            exit 1
+          fi
+
+          echo "Security gate passed."
