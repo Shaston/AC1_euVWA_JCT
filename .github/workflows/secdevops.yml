@@ -32,6 +32,71 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Semgrep
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install semgrep
+
+      - name: Run SAST with Semgrep
+        run: |
+          mkdir -p reports
+          semgrep scan \
+            --config p/owasp-top-ten \
+            --config p/javascript \
+            --json \
+            --output reports/semgrep-report.json \
+            .
+
+          semgrep scan \
+            --config p/owasp-top-ten \
+            --config p/javascript \
+            --text \
+            --output reports/semgrep-report.txt \
+            .
+
+      - name: Generate Semgrep summary
+        if: always()
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+          const path = "reports/semgrep-report.json";
+
+          let count = 0;
+          let findings = [];
+
+          if (fs.existsSync(path)) {
+            const data = JSON.parse(fs.readFileSync(path, "utf8"));
+            findings = data.results || [];
+            count = findings.length;
+          }
+
+          const bySeverity = {};
+          for (const finding of findings) {
+            const severity = finding.extra?.severity || "UNKNOWN";
+            bySeverity[severity] = (bySeverity[severity] || 0) + 1;
+          }
+
+          let md = "# Semgrep SAST report\n\n";
+          md += `- Total findings: ${count}\n`;
+          md += `- Branch: ${process.env.GITHUB_REF_NAME}\n`;
+          md += `- Commit: ${process.env.GITHUB_SHA}\n\n`;
+          md += "## Findings by severity\n\n";
+
+          for (const [severity, total] of Object.entries(bySeverity)) {
+            md += `- ${severity}: ${total}\n`;
+          }
+
+          if (findings.length > 0) {
+            md += "\n## First findings\n\n";
+            for (const finding of findings.slice(0, 10)) {
+              md += `- **${finding.check_id}** in \`${finding.path}\` line ${finding.start?.line || "?"}\n`;
+              md += `  - ${finding.extra?.message || "No message"}\n`;
+            }
+          }
+
+          fs.writeFileSync("reports/semgrep-summary.md", md);
+          EOF
+
       - name: Show project metadata
         run: |
           mkdir -p reports
@@ -56,8 +121,9 @@ jobs:
         run: |
           docker build -t euvwa:${{ github.ref_name }} .
 
-      - name: Upload baseline report
+      - name: Upload pipeline reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: baseline-report-${{ github.ref_name }}
-          path: reports/baseline-report.md
+          name: secdevops-reports-${{ github.ref_name }}
+          path: reports/
