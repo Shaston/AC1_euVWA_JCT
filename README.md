@@ -752,4 +752,35 @@ En main-secure, ZAP no detecta alertas de riesgo alto. El informe puede seguir m
 <img width="450" height="270" alt="image" src="https://github.com/user-attachments/assets/703ed77a-9755-4b16-9d8d-28793a81918f" />
 
 
+
 Escaneo de imagen Docker con Trivy
+
+la imagen euvwa:ci, Trivy analiza la imagen Docker.
+reports/trivy-image-report.json
+
+Identifica vulnerabilidades conocidas en la imagen final del contenedor, incluyendo paquetes del sistema base y librerías instaladas. Es una validación importante porque una aplicación puede tener código seguro pero ejecutarse sobre una imagen con componentes vulnerables.
+
+El escaneo de imagen se mantiene como control informativo/reporting, mientras que el bloqueo principal del pipeline se realiza mediante el security gate basado en alertas High de ZAP.
+
+
+Security Gate
+
+El pipeline incluye un security gate propio basado en el informe JSON de OWASP ZAP, aplicando el siguiente criterio.
+El pipeline falla si OWASP ZAP detecta cualquier alerta de riesgo High y genera el reporte reports/security-gate-report.md
+
+Por ejemplo en este caso, es del vulnerable.
+<img width="978" height="303" alt="image" src="https://github.com/user-attachments/assets/249d4308-024b-41b4-8f87-0030d87ceab2" />
+
+El security gate transforma el pipeline de un sistema meramente informativo a un sistema de control. Si se detecta una vulnerabilidad de alto riesgo en la aplicación en ejecución, el pipeline se bloquea.
+
+<img width="803" height="389" alt="image" src="https://github.com/user-attachments/assets/10fc6955-b7e9-4bd4-8ec7-d026b15bd393" />
+
+La rama vulnerable falla porque ZAP detecta exposición de datos sensibles.
+
+La rama segura pasa porque no presenta alertas High en el DAST.
+
+<img width="526" height="237" alt="image" src="https://github.com/user-attachments/assets/74134414-c3a3-488a-a2c8-b8cf8172b212" />
+
+<img width="466" height="131" alt="image" src="https://github.com/user-attachments/assets/a39ce0d2-b18c-4a53-ab49-949e92b33198" />
+
+Publicación Docker en GHCR
