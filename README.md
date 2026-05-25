@@ -626,3 +626,51 @@ El fichero sbom-cyclonedx.json queda incluido en los artefactos descargables del
 
 Análisis del SBOM con Trivy
 
+Después de generar el SBOM, el pipeline lo analiza también con Trivy.
+
+Genera el artefacto:
+reports/trivy-sbom-report.json
+<img width="511" height="28" alt="image" src="https://github.com/user-attachments/assets/6d853f36-f299-4c48-ba57-c9064f461149" />
+
+El SBOM no solo se genera como inventario, sino que también puede utilizarse como entrada para análisis de vulnerabilidades. Esto permite separar la fase de inventariado de la fase de evaluación de riesgos.
+
+
+Generación de metadatos del pipeline
+
+El pipeline genera un pequeño informe base con información del contexto de ejecución:
+reports/baseline-report.md
+<img width="510" height="36" alt="image" src="https://github.com/user-attachments/assets/2e3f8cbe-5f46-4d27-8a65-61c722460938" />
+
+Incluye datos como:
+
+-rama ejecutada.
+-commit analizado.
+-versión de Node.js.
+-versión de npm.
+-fecha de ejecución.
+
+<img width="448" height="202" alt="image" src="https://github.com/user-attachments/assets/f8822c48-90fc-41af-b5b1-e0a552ead428" />
+
+Permite asociar los resultados de SAST, DAST, Trivy y SBOM a una rama y commit concretos.
+
+
+
+Validación de arranque de la aplicación
+
+Antes de construir la imagen y lanzar DAST, el pipeline comprueba que la aplicación puede arrancar correctamente, la aplicación Express queda escuchando de forma persistente, por lo que el workflow utiliza un timeout controlado para considerar correcto el arranque si el proceso permanece y evita lanzar análisis dinámicos o construir imágenes sobre una aplicación rota. Si la aplicación no puede arrancar, el pipeline debe detectarlo pronto.
+
+Construcción de imagen Docker
+
+El pipeline construye una imagen Docker local:
+docker build -t euvwa:ci .
+
+valida que el proyecto puede empaquetarse de forma reproducible en un contenedor. La imagen resultante se utiliza después para:
+
+-ejecutar la aplicación durante el DAST.
+-escanear vulnerabilidades de imagen.
+-publicar la imagen segura en GHCR cuando el pipeline pasa los controles.
+
+<img width="769" height="759" alt="image" src="https://github.com/user-attachments/assets/3bf4c071-a720-4861-a410-53851d0e5c49" />
+
+
+Endurecimiento aplicado en Dockerfile
