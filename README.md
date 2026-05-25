@@ -588,3 +588,41 @@ El pipeline genera informes de Semgrep en ambas ramas. En mi caso, Semgrep se ut
 
 <img width="685" height="677" alt="image" src="https://github.com/user-attachments/assets/63ce45d1-22c4-4c4b-a5db-e3df7f367968" />
 
+Escaneo de dependencias y filesystem con Trivy
+
+Trivy analiza el repositorio y las dependencias instaladas mediante un escaneo de filesystem.
+
+Generando los siguientes artefactos:
+
+
+reports/trivy-fs-report.json
+reports/trivy-summary.md
+
+Este control permite identificar vulnerabilidades conocidas en librerías, paquetes y componentes utilizados por la aplicación. A diferencia del SAST, que revisa patrones de código, Trivy revisa componentes y versiones para detectar CVEs conocidas.
+
+El informe de Trivy queda disponible como artefacto del pipeline. En esta práctica se utiliza como evidencia de análisis de dependencias y como fuente de propuestas de mejora, pero no como bloqueo principal del pipeline.
+
+<img width="866" height="620" alt="image" src="https://github.com/user-attachments/assets/9e04fc27-8719-4ad2-a336-62b6cc8a2d35" />
+
+<img width="524" height="760" alt="image" src="https://github.com/user-attachments/assets/aa896ce2-ab7e-4982-8be9-8d5203cfedbf" />
+
+
+Generación de SBOM CycloneDX
+
+El pipeline genera un SBOM en formato CycloneDX usando Trivy.
+
+Generando el artefacto:
+reports/sbom-cyclonedx.json
+
+El SBOM funciona como inventario de componentes software del proyecto. Permite conocer qué librerías, versiones y dependencias forman parte de la aplicación, facilita auditorías, trazabilidad y análisis posteriores ante vulnerabilidades nuevas.
+
+El fichero sbom-cyclonedx.json queda incluido en los artefactos descargables del workflow.
+
+<img width="309" height="96" alt="image" src="https://github.com/user-attachments/assets/19add6de-c63e-4bd5-aad1-ddaa288a8214" />
+
+
+<img width="612" height="938" alt="image" src="https://github.com/user-attachments/assets/6285cd9b-995b-44eb-b90f-8727f9a4592d" />
+
+
+Análisis del SBOM con Trivy
+
