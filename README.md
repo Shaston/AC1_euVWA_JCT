@@ -513,13 +513,13 @@ generar informes descargables como artefactos del workflow.
 aplicar un security gate que bloquee la rama vulnerable cuando existan alertas de riesgo alto.
 publicar la imagen Docker de la versión segura en GitHub Container Registry.
 
-**2. Estructura del workflow
-**
-**El workflow principal se encuentra en: 
-**.github/workflows/secdevops.yml
+2. Estructura del workflow
 
-**El pipeline se ejecuta en las ramas:
-**-main-vulnerable
+El workflow principal se encuentra en: 
+.github/workflows/secdevops.yml
+
+El pipeline se ejecuta en las ramas:
+-main-vulnerable
 -main-secure
 
 También puede ejecutarse manualmente mediante workflow_dispatch desde la pestaña Actions del repositorio.
@@ -528,17 +528,17 @@ El workflow utiliza un runner Linux de GitHub Actions y organiza todo el proceso
 
 <img width="653" height="718" alt="image" src="https://github.com/user-attachments/assets/dd44360e-23aa-478f-8947-edd859abe8de" />
 
-**3. Fases del pipeline y propósito de seguridad
-**
+3. Fases del pipeline y propósito de seguridad
+
 check del repositorio, la primera fase descarga el contenido de la rama que ha lanzado el workflow
 - name: Checkout repository
   uses: actions/checkout@v6
 
-**Propósito de seguridad:**
+Propósito de seguridad:
 Permite analizar exactamente el código que se ha subido a la rama correspondiente. Esto garantiza trazabilidad entre commit, rama, informes generados y resultado final del pipeline.
 
-**Preparación de Node.js
-**
+Preparación de Node.js
+
 Prepara el entorno de ejecución Node.js usado por el pipeline.
 - name: Setup Node.js
   uses: actions/setup-node@v6
@@ -546,8 +546,45 @@ Prepara el entorno de ejecución Node.js usado por el pipeline.
     node-version: "24"
     cache: "npm"
 
-**Propósito de seguridad:
-**
+Propósito de seguridad:
 El uso de una versión concreta de Node.js hace que la ejecución sea reproducible. Usar acciones actualizadas evita advertencias deprecadas del runtime de GitHub Actions y reduce problemas por versiones antiguas del entorno de CI.
 
+<img width="833" height="298" alt="image" src="https://github.com/user-attachments/assets/b4a76fe4-1477-40c9-812f-eb695c107a4c" />
+
+Instalación de dependencias
+
+El pipeline instala las dependencias declaradas en package-lock.json mediante:
+npm ci
+
+Propósito de seguridad:
+
+npm ci instala las dependencias a partir del lockfile. Esto evita instalaciones variables entre entornos y permite que los análisis posteriores se ejecuten sobre el árbol real de dependencias del proyecto.
+
+
+Análisis SAST con Semgrep
+
+Se ejecuta Semgrep como herramienta de análisis estático de código fuente.
+El análisis se realiza sobre el repositorio completo y genera informes en formato JSON y texto:
+
+-reports/semgrep-report.json
+-reports/semgrep-report.txt
+-reports/semgrep-summary.md
+
+Propósito de seguridad:
+
+SAST permite detectar patrones inseguros sin ejecutar la aplicación. En este caso se utiliza para revisar código JavaScript, Dockerfile, YAML del workflow y otros ficheros del repositorio.
+
+
+Entre los tipos de hallazgos que puede detectar se incluyen:
+
+concatenación insegura de comandos.
+-patrones de inyección.
+-uso inseguro de entrada de usuario.
+-configuraciones débiles.
+-problemas en Dockerfile.
+-posibles malas prácticas en workflows CI/CD.
+
+El pipeline genera informes de Semgrep en ambas ramas. En mi caso, Semgrep se utiliza como control informativo/reporting y no como bloqueo principal. El bloqueo se aplica posteriormente mediante el security gate basado en DAST. Las priemras versiones fueron de aviso y las finales ya fueron de bloqueo.
+
+<img width="685" height="677" alt="image" src="https://github.com/user-attachments/assets/63ce45d1-22c4-4c4b-a5db-e3df7f367968" />
 
