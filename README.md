@@ -1,4 +1,4 @@
-# AC1_euVWA_JCT
+# AC1_euVWA_JCT y AC2
 Damn Vulnerable Web Application (DVWA) a un entorno moderno basado en Node.js + Express, creando la aplicación euVWA
 
 
@@ -481,4 +481,38 @@ docker run --rm -p 3002:3000 -e PORT=3000 -e NODE_ENV=production -e SESSION_SECR
 Probando docker con el 2º lab, anteriormente ya probé el vulnerable.
 
 <img width="1057" height="915" alt="image" src="https://github.com/user-attachments/assets/54ca46f0-7a4b-43de-9117-f36d9786241a" />
+
+--
+PARTE AC2
+
+Pipeline SecDevOps
+
+Incorporar un flujo SecDevOps mediante GitHub Actions, automatizando controles de seguridad sobre el código, dependencias, SBOM, aplicación en ejecución e imagen Docker.
+
+El pipeline se ha aplicado sobre dos ramas principales:
+
+  -main-vulnerable: versión vulnerable de la aplicación. El pipeline debe detectar riesgo alto y finalizar en estado failed.
+  -main-secure: versión securizada de la aplicación. El pipeline debe superar los controles configurados y finalizar en estado passed.
+
+  <img width="579" height="150" alt="image" src="https://github.com/user-attachments/assets/f70d48a9-e277-4591-ad2b-0eee20e51b09" />
+
+
+1. Objetivo del pipeline
+
+El pipeline implementado integra controles de seguridad dentro del ciclo de integración continua. De esta forma, cada cambio subido al repositorio ejecuta automáticamente una serie de validaciones técnicas antes de considerar la versión como aceptable.
+
+Los objetivos principales son:
+
+validar que el proyecto puede instalar dependencias y arrancar correctamente.
+construir una imagen Docker reproducible.
+ejecutar análisis estático de código fuente mediante SAST.
+generar un SBOM en formato CycloneDX.
+analizar vulnerabilidades en dependencias, SBOM e imagen Docker.
+ejecutar análisis dinámico DAST contra la aplicación levantada en CI.
+generar informes descargables como artefactos del workflow.
+aplicar un security gate que bloquee la rama vulnerable cuando existan alertas de riesgo alto.
+publicar la imagen Docker de la versión segura en GitHub Container Registry.
+
+2. Estructura del workflow
+
 
