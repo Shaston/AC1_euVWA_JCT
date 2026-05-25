@@ -515,4 +515,19 @@ publicar la imagen Docker de la versión segura en GitHub Container Registry.
 
 2. Estructura del workflow
 
+El workflow principal se encuentra en: 
+.github/workflows/secdevops.yml
+
+El pipeline se ejecuta en las ramas:
+-main-vulnerable
+-main-secure
+
+También puede ejecutarse manualmente mediante workflow_dispatch desde la pestaña Actions del repositorio.
+
+El workflow utiliza un runner Linux de GitHub Actions y organiza todo el proceso dentro de un job principal denominado Baseline build and validation.
+
+<img width="653" height="718" alt="image" src="https://github.com/user-attachments/assets/dd44360e-23aa-478f-8947-edd859abe8de" />
+
+3. Fases del pipeline y propósito de seguridad
+
 
