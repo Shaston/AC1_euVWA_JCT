@@ -837,5 +837,19 @@ Los artefactos permiten revisar evidencias técnicas después de cada ejecución
 <img width="177" height="369" alt="image" src="https://github.com/user-attachments/assets/ce935ddf-a633-4561-9c1a-2641df240e77" />
 
 
-Informe SAST - Semgrep
+Sobre algunas mejoras de seguridad, podrian ser...
+
+Endurecimiento de cabeceras http
+
+definir Content Security Policy.
+añadir X-Frame-Options o equivalente mediante CSP frame-ancestors.
+eliminar o controlar la cabecera X-Powered-By.
+
+Gate adicional con Trivy
+actualizar imagen base Node cuando existan parches disponibles.
+
+Gate adicional con Semgrep
+activar bloqueo para findings críticos o de alta confianza.
+
+
 
