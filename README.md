@@ -674,3 +674,82 @@ valida que el proyecto puede empaquetarse de forma reproducible en un contenedor
 
 
 Endurecimiento aplicado en Dockerfile
+
+El Dockerfile se ha ajustado para mejorar la seguridad de la imagen.
+
+-uso de imagen base oficial node:22-bookworm-slim.
+-instalación solo de dependencias necesarias para compilar módulos nativos.
+-eliminación de caché de apt para reducir residuos en la imagen.
+-instalación reproducible mediante npm ci --omit=dev.
+-eliminación de node_modules previo para evitar copiar dependencias del host.
+-creación de usuario específico appuser.
+-cambio de propiedad de /app a appuser.
+-ejecución final de la aplicación como usuario no privilegiado mediante USER appuser.
+-exposición únicamente del puerto necesario 3000.
+-ausencia de secretos embebidos en la imagen.
+
+Medidas que reducen la superficie de ataque del contenedor y evitan que la aplicación se ejecute como root. Si la aplicación sufriera una explotación, el atacante quedaría limitado por los permisos del usuario no privilegiado dentro del contenedor.
+
+<img width="819" height="631" alt="image" src="https://github.com/user-attachments/assets/9124203d-4121-4d58-b23e-c6968c03e989" />
+
+Aplicación para DAST
+
+Para realizar el análisis dinámico, el pipeline crea una red Docker temporal:
+secdevops-net
+
+Después levanta la aplicación en un contenedor llamado:
+euvwa-dast
+
+La aplicación se expone internamente como:
+http://euvwa-dast:3000
+
+El DAST necesita analizar la aplicación en ejecución. Al levantarla dentro del workflow, el pipeline prueba la aplicación de forma automatizada y sin intervención manual.
+
+Usar una red Docker dedicada evita depender de configuraciones externas y permite que OWASP ZAP acceda al contenedor por nombre de servicio.
+
+
+Análisis DAST con OWASP ZAP Baseline
+
+El pipeline ejecuta OWASP ZAP en modo baseline contra la aplicación levantada en Docker.
+
+Genera los siguientes artefactos:
+
+-reports/zap/zap-report.json
+-reports/zap/zap-report.html
+-reports/zap/zap-report.md
+-reports/zap/zap.yaml
+-reports/zap-summary.md
+
+<img width="514" height="131" alt="image" src="https://github.com/user-attachments/assets/5f5394bc-8bdc-463b-b602-98ae74a3d7a7" />
+
+<img width="587" height="55" alt="image" src="https://github.com/user-attachments/assets/4e55ee0d-2069-4452-be92-04bfa3f15e8f" />
+
+DAST analiza la aplicación desde fuera, simulando la perspectiva de un cliente o atacante. SAST, no revisa el código fuente directamente, sino el comportamiento real de la aplicación en ejecución.
+
+Se utiliza ZAP Baseline porque permite realizar un análisis pasivo y "rápido" para integración continua.
+<img width="488" height="736" alt="image" src="https://github.com/user-attachments/assets/9b42c3fc-aa37-4a40-83d5-ef85619debdb" />
+
+
+Resultado en la rama vulnerable
+En main-vulnerable, ZAP detecta una alerta de riesgo alto:
+
+High - PII Disclosure
+URL: /sensitive-vul/profile
+Evidencia: 4111111111111111
+
+<img width="1247" height="399" alt="image" src="https://github.com/user-attachments/assets/327605d6-bb2f-4878-a469-a2021d877da8" />
+
+
+Esta alerta se corresponde con el módulo vulnerable de exposición de datos sensibles.
+
+<img width="1231" height="804" alt="image" src="https://github.com/user-attachments/assets/0e1aab11-29a6-4d19-be72-25b6bdb9e049" />
+
+
+Resultado en la rama segura:
+
+En main-secure, ZAP no detecta alertas de riesgo alto. El informe puede seguir mostrando alertas medias o bajas relacionadas con cabeceras HTTP de hardening, pero el riesgo alto presente en la rama vulnerable desaparece.
+
+<img width="450" height="270" alt="image" src="https://github.com/user-attachments/assets/703ed77a-9755-4b16-9d8d-28793a81918f" />
+
+
+Escaneo de imagen Docker con Trivy
