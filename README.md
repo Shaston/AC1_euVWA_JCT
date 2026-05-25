@@ -784,3 +784,58 @@ La rama segura pasa porque no presenta alertas High en el DAST.
 <img width="466" height="131" alt="image" src="https://github.com/user-attachments/assets/a39ce0d2-b18c-4a53-ab49-949e92b33198" />
 
 Publicación Docker en GHCR
+
+La imagen Docker de la rama segura se publica en GitHub Container Registry cuando se cumplen estas condiciones:
+
+-la rama ejecutada es main-secure.
+-el security gate no ha fallado.
+-la imagen Docker se ha construido correctamente.
+
+reports/published-image.md
+
+Imagen publicada:
+ghcr.io/shaston/ac1_euvwa_jct:secure-latest
+ghcr.io/shaston/ac1_euvwa_jct:secure-<commit>
+
+Solo se publica la imagen correspondiente a la rama segura. La versión vulnerable queda bloqueada por el security gate y no llega a publicarse, evitando distribuir una imagen con vulnerabilidades críticas o altas detectadas dinámicamente.
+
+<img width="356" height="139" alt="image" src="https://github.com/user-attachments/assets/d3a2e74a-7139-4ef1-a3dc-eb5c67ae9be5" />
+
+<img width="471" height="157" alt="image" src="https://github.com/user-attachments/assets/020aa00e-4f08-4ad5-b909-4220deb099f4" />
+
+Subida de artefactos
+
+Todos los informes generados se suben como artefacto del workflow.
+
+secdevops-reports-main-vulnerable
+secdevops-reports-main-secure
+
+Generando los siguientes informes o artefactos:
+
+baseline-report.md
+semgrep-report.json
+semgrep-report.txt
+semgrep-summary.md
+sbom-cyclonedx.json
+trivy-fs-report.json
+trivy-sbom-report.json
+trivy-image-report.json
+trivy-summary.md
+zap/zap-report.html
+zap/zap-report.json
+zap/zap-report.md
+zap/zap.yaml
+zap-summary.md
+security-gate-report.md
+published-image.md
+
+Los artefactos permiten revisar evidencias técnicas después de cada ejecución, incluso si el pipeline falla. Esto es importante en la rama vulnerable, donde el pipeline termina en rojo pero conserva los informes necesarios para justificar el motivo del bloqueo.
+
+<img width="764" height="196" alt="image" src="https://github.com/user-attachments/assets/638c36f2-3393-4486-bbbf-1bf93c3740c8" />
+
+
+<img width="177" height="369" alt="image" src="https://github.com/user-attachments/assets/ce935ddf-a633-4561-9c1a-2641df240e77" />
+
+
+Informe SAST - Semgrep
+
