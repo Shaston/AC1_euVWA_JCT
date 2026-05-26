@@ -852,4 +852,68 @@ Gate adicional con Semgrep
 activar bloqueo para findings críticos o de alta confianza.
 
 
+Contenido de los informes.
 
+Informe SAST - Semgrep
+
+Genera los ficheros:
+semgrep-report.json
+semgrep-report.txt
+semgrep-summary.md
+
+El informe SAST documenta hallazgos detectados mediante análisis estático. El fichero JSON permite revisión estructurada, mientras que el fichero TXT.
+
+Semgrep se utiliza como control de visibilidad. Sus resultados no son el criterio principal de bloqueo porque algunos hallazgos pueden ser advertencias de contexto, código de laboratorio o patrones deliberadamente vulnerables en main-vulnerable.
+
+Informe DAST - OWASP ZAP
+
+Genera los ficheros:
+zap-report.html
+zap-report.json
+zap-report.md
+zap-summary.md
+
+El informe DAST documenta alertas detectadas sobre la aplicación en ejecución.
+
+El resumen de zap-summary.md incluye:
+
+riesgo;
+
+confianza.
+nombre de la alerta.
+número de ocurrencias.
+URL afectada.
+método HTTP.
+parámetro o cabecera implicada.
+evidencia encontrada.
+referencia CWE/WASC.
+
+En la rama vulnerable destaca la alerta High de PII Disclosure, mientras que en la rama segura no se detectan alertas High.
+
+Informes Trivy
+
+genera los ficheros:
+trivy-fs-report.json
+trivy-sbom-report.json
+trivy-image-report.json
+trivy-summary.md
+
+Trivy se utiliza para tres objetivos:
+analizar dependencias y filesystem del repositorio.
+analizar el SBOM generado.
+analizar la imagen Docker final.
+
+Trivy se usa como control de reporting. Las vulnerabilidades detectadas sirven para documentar riesgos residuales y propuestas de mejora, pero el umbral de bloqueo final se ha configurado sobre ZAP High para demostrar claramente la diferencia entre rama vulnerable y segura.
+
+SBOM CycloneDX
+
+Genera : sbom-cyclonedx.json
+
+El SBOM incluye el inventario de componentes software utilizados por la aplicación. Este documento permite conocer las dependencias y facilita la revisión de impacto si aparece una vulnerabilidad nueva en alguna librería.
+
+Informe del Security Gate
+generando: security-gate-report.md
+
+resume el resultado del control de bloqueo:
+en main-vulnerable, el gate falla por alerta High detectada por ZAP
+en main-secure, el gate pasa al no existir alertas High.
